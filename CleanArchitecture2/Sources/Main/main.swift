@@ -1,53 +1,41 @@
-import Entities
+import Domain
 import UseCase
 import Interface
 import Infrastructure
-import SQLite
 import Kitura
+import SQLite
 
-struct MYLogger: Logger {
-    public func logger(msg: String) {
-        print(msg)
-    }
+struct MQLogger: Logger {
+    func logger(_ msg: String) {
+	print(msg)
+    } 
 }
 
 func main() {
-
     let filename = "db.sqlite3"
-    let handler = Infrastructure.SqliteHandler(dbfileName: filename)
-
-    var dbHandlers: [String: DbHandler] = [:]
-    dbHandlers["DbUserRepo"] = handler
-    dbHandlers["DbCustomerRepo"] = handler
-    dbHandlers["DbItemRepo"] = handler
-    dbHandlers["DbOrderRepo"] = handler
-
-    let userRepo = DbUserRepo.repo(dbHandlers: dbHandlers)
+    let sqliteHandle = SqliteHandler(filename: filename)
+    var dbHandlers = [String: DbHandler]()
+    dbHandlers["DbItemRepo"] = sqliteHandle
+    dbHandlers["DbUserRepo"] = sqliteHandle
+    dbHandlers["DbOrderRepo"] = sqliteHandle
+    dbHandlers["DbCustomerRepo"] = sqliteHandle
     let itemRepo = DbItemRepo.repo(dbHandlers: dbHandlers)
+    let userRepo = DbUserRepo.repo(dbHandlers: dbHandlers)
     let orderRepo = DbOrderRepo.repo(dbHandlers: dbHandlers)
-
-    let logger = MYLogger()
-
-    let orderInteractor = UseCase.OrderInteractor(userRepo: userRepo,
-                    itemRepo: itemRepo,
-                    orderRepo: orderRepo,
-                    logger: logger)
-    let webServiceHandler = WebserviceHandler(orderInteractor: orderInteractor)
-
+    let logger = MQLogger()
+    let orderInteractor = OrderInteractor(itemRepo: itemRepo, userRepo: userRepo, orderRepo: orderRepo, logger: logger)
     
     let router = Router()
     router.get("/orders") {
-	request, response, next in
-	print(request)
-	webServiceHandler.showOrder(req: request, res: response)
+	req, res, next in
+	
+	print(req)
+	let webserviceHandler = WebServiceHandler(orderInteractor: orderInteractor)
+	webserviceHandler.showItems(request: req, response: res)
 	next()
     }
     Kitura.addHTTPServer(onPort: 8080, with: router)
     Kitura.run()
-
-//    let (items, _) = orderInteractor.items(userId: "40", orderId: "60")
-//    print(items)
-
 }
 
 func creatTables() {
@@ -70,6 +58,6 @@ func creatTables() {
     try! db.execute("INSERT INTO items2orders (item_id, order_id) VALUES (104, 60);")
 }
 
-//main()
-creatTables()
+main()
+//creatTables()
 
