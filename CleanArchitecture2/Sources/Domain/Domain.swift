@@ -2,17 +2,17 @@
 
 public protocol ItemRepo {
     func store(_ item: Item) -> Error?
-    func find(id: String) -> Item?
+    func find(id: String) -> (Item, Error?)
 }
 
 public protocol CustomerRepo {
     func store(_ customer: Customer) -> Error? 
-    func find(id: String) -> Customer?
+    func find(id: String) -> (Customer, Error?)
 }
 
 public protocol OrderRepo {
     func store(_ order: Order) -> Error? 
-    func find(id: String) -> Order?
+    func find(id: String) -> (Order, Error?)
 }
 
 public struct Item {

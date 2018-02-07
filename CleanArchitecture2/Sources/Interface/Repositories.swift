@@ -30,18 +30,20 @@ extension DbItemRepo: ItemRepo {
 	return dbHandler.execute(statement)
     }
 
-    public func find(id: String) -> Domain.Item? {
+    public func find(id: String) -> (Domain.Item,Error?) {
 	let statement = "SELECT name, value, available FROM items WHERE id = \(id) LIMIT 1;"
 	guard let rows = dbHandler.prepare(statement) as? [[Any]],
 	    let row = rows.first,
 	    let name = row[0] as? String,
 	    let value = row[1] as? Double,
 	    let avai = row[2] as? Int64 else {
-	    return nil
+	    let error = "获取Item失败"
+	    let item = Domain.Item(id: "", name: "", value: 0.0, available: false)
+	    return (item, error)
 	}
 	let available = avai == 1
 	let item = Domain.Item(id: id, name: name, value: value, available: available)
-	return item
+	return (item, nil)
     }
 }
 
@@ -58,14 +60,19 @@ extension DbCustomerRepo: CustomerRepo {
 	return dbHandler.execute(statement)
     }
 
-    public func find(id: String) -> Customer? {
+    public func find(id: String) -> (Customer, Error?) {
 	let statement = "SELECT name FROM customers WHERE id = \(id) LIMIT 1;"
-	guard let rows = dbHandler.prepare(statement) as? [String],
-	    let name = rows.first else {
-	    return nil
+	let result = dbHandler.prepare(statement)
+	guard let rows = result as? [[String]],
+	    let row = rows.first,
+	    let name = row.first else {
+	    let error = "获取id(\(id))的 Customer 失败"
+	    let customer = Customer(id: "", name: "") 
+
+	    return (customer, error)
 	}
 	let customer = Customer(id: id, name: name) 
-	return customer
+	return (customer, nil)
     }
     
 }
@@ -84,32 +91,28 @@ extension DbUserRepo: UserRepo {
 	if let error = dbHandler.execute(statement) {
 	    return error
 	}
-	guard let repo = dbHandlers["DbCustomerRepo"],
-	    let customerRepo = repo as? DbCustomerRepo else {
-	    return "customerRepo type error"
-	}
+	let customerRepo = DbCustomerRepo.repo(dbHandlers: dbHandlers)
 	return customerRepo.store(user.customer)
     }
 
-    public func find(id: String) -> User? {
-	let statement = "SELECT customerId, isAdmin FROM users WHERE id = \(id) LIMIT 1;"
-	guard let rows = dbHandler.prepare(statement) as? [[Any]],
+    public func find(id: String) -> (User, Error?) {
+	let statement = "SELECT customer_id, is_admin FROM users WHERE id = \(id) LIMIT 1;"
+	let errorUser = User(id: "", customer: Customer(id: "", name: ""), isAdmin: false)
+	let result = dbHandler.prepare(statement) 
+	guard let rows = result as? [[Any]],
 	    let row = rows.first,
 	    let customerId = row[0] as? String,
 	    let admin = row[1] as? Int64 else {
-	    return nil
+	    return (errorUser, "获取customerId 或者 admin 失败,result is \(result) ,userId is \(id)")
 	}
 	let isAdmin = admin == 1
-	
-	guard let repo = dbHandlers["DbCustomerRepo"],
-	    let customerRepo = repo as? DbCustomerRepo else {
-	    return nil 
-	}
-	guard let customer = customerRepo.find(id: customerId) else {
-	    return nil
+	let customerRepo = DbCustomerRepo.repo(dbHandlers: dbHandlers)
+	let (customer, customerError) = customerRepo.find(id: customerId)
+	if let error = customerError {
+	    return (errorUser, "获取customer失败, error is \(error)")
 	}
 	let user = User(id: id, customer: customer, isAdmin: isAdmin)
-	return user
+	return (user, nil)
     }
     
 } 
@@ -137,28 +140,36 @@ extension DbOrderRepo: OrderRepo {
 
     }
 
-    public func find(id: String) -> Order? {
-	let statement = "SELECT customerId FROM orders WHERE id = \(id) LIMIT 1;"
-	guard let rows = dbHandler.prepare(statement) as? [String],
-	    let customerId = rows.first else {
-	    return nil
+    public func find(id: String) -> (Order, Error?) {
+
+	let statement = "SELECT customer_id FROM orders WHERE id = \(id) LIMIT 1;"
+	let errorOrder = Order(id: "", customerId: "", items: [])
+	guard let rows = dbHandler.prepare(statement) as? [[String]],
+	    let row = rows.first,
+	    let customerId = row.first  else {
+	    return (errorOrder, "获取customerId失败")
 	}
-	let sta = "SELECT itemId FROM orders WHERE id = \(id);"
-	guard let itemIds = dbHandler.prepare(sta) as? [String] else {
-	    return nil
+	let sta = "SELECT item_id FROM items2orders WHERE order_id = \(id);"
+	let result = dbHandler.prepare(sta)
+	print(result)
+	guard let itemRows = result as? [[String]] else {
+	    return (errorOrder, "获取itemIds失败")
 	}
 	let itemRepo = DbItemRepo.repo(dbHandlers: dbHandlers)
 	var items = [Domain.Item]()
-	for itemId in itemIds {
-	    guard let item = itemRepo.find(id: itemId) else {
-		return nil
+	for itemRow in itemRows {
+	    guard let itemId = itemRow.first else {
+		return (errorOrder, "获取itemId失败")
+	    }
+	    let (item, error) = itemRepo.find(id: itemId) 
+	    if let error = error {
+		return (errorOrder, "获取itemId(\(itemId))的item失败 error is \(error)")
 	    }
 	    items.append(item)
-	}
-    
+	} 
 
 	let order = Order(id: id, customerId: customerId, items: items)
-	return order
+	return (order, nil)
     }
 
 }

@@ -2,7 +2,7 @@ import Domain
 
 public protocol UserRepo {
     func store(_ user: User) -> Error?
-    func find(id: String) -> User?
+    func find(id: String) -> (User, Error?)
 }
 
 public protocol Logger {
@@ -48,14 +48,17 @@ public struct OrderInteractor {
 
 extension OrderInteractor {
     public func add(userId: String, orderId: String, itemId: String) -> Error? {
-	guard let user = userRepo.find(id: userId) else {
-	    return "找不到id 为 \(userId) 的 user"
+	let (user, error) = userRepo.find(id: userId)
+	if let error = error {
+	    return "找不到id 为 \(userId) 的 user, error msg is \(error)"
 	}
-	guard var order = orderRepo.find(id: orderId) else {
-	    return "找不到id 为 \(orderId) 的 order "
+	var (order, error2) = orderRepo.find(id: orderId) 
+	if let error2 = error2 {
+	    return "找不到id 为 \(orderId) 的 order, error msg is \(error2) "
 	}
-	guard let item = itemRepo.find(id: itemId) else {
-	    return "找不到id 为 \(itemId) 的 item "
+	let (item, error3) = itemRepo.find(id: itemId) 
+	if let error3 = error3 {
+	    return "找不到id 为 \(itemId) 的 itemi, error msg is \(error3) "
 	}
 	guard user.customer.id == order.customerId else {
 	    return "订单不属于该用户"
@@ -65,14 +68,16 @@ extension OrderInteractor {
     }
 
    public func items(userId: String, orderId: String) -> ([Item], Error?) {
-	guard let user = userRepo.find(id: userId) else {
-	    return ([], "找不到id 为 \(userId) 的 user")
+	let (user, error) = userRepo.find(id: userId)
+	if let error = error {
+	    return ([],"找不到id 为 \(userId) 的 user, error msg is \(error)")
 	}
-	guard let order = orderRepo.find(id: orderId) else {
-	    return ([], "找不到id 为 \(orderId) 的 order ")
+	let (order, error2) = orderRepo.find(id: orderId) 
+	if let error2 = error2 {
+	    return ([],"找不到id 为 \(orderId) 的 order, error msg is \(error2) ")
 	}
 	guard user.customer.id == order.customerId else {
-	    return ([], "订单不属于该用户")
+	    return ([],"订单不属于该用户")
 	}
 	let items = order.items.map {
 	    Item(id: $0.id, name: $0.name, value: $0.value)
@@ -97,17 +102,20 @@ public struct AdminOrderInteractor {
 
 extension AdminOrderInteractor {
     public func add(userId: String, orderId: String, itemId: String) -> Error? {
-	guard let user = userRepo.find(id: userId) else {
-	    return "找不到id 为 \(userId) 的 user"
+	let (user, error) = userRepo.find(id: userId)
+	if let error = error {
+	    return "找不到id 为 \(userId) 的 user, error msg is \(error)"
 	}
 	guard user.isAdmin else {
 	    return "该用户不是管理员"
 	}
-	guard var order = orderRepo.find(id: orderId) else {
-	    return "找不到id 为 \(orderId) 的 order "
+	var (order, error2) = orderRepo.find(id: orderId) 
+	if let error2 = error2 {
+	    return "找不到id 为 \(orderId) 的 order, error msg is \(error2) "
 	}
-	guard let item = itemRepo.find(id: itemId) else {
-	    return "找不到id 为 \(itemId) 的 item "
+	let (item, error3) = itemRepo.find(id: itemId) 
+	if let error3 = error3 {
+	    return "找不到id 为 \(itemId) 的 itemi, error msg is \(error3) "
 	}
 
 	return order.add(item: item) 

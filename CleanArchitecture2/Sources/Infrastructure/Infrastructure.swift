@@ -26,8 +26,9 @@ extension SqliteHandler: DbHandler {
 	    for row in rows {
 		result.append(row)
 	    }
-		
-	} catch {
+	    return result		
+	} catch let error {
+	    print(error)
 	}
 	return []
     }
