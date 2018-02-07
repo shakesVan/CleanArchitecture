@@ -6,19 +6,15 @@ git clone https://github.com/xiaoyao250/CleanArchitecture.git
 ```
 ## 运行
 ```
-cd CleanArchitecture/CleanArchitecture/
+cd CleanArchitecture/CleanArchitecture2/
 swift build
 ./.build/debug/Main
 ```
-## 在浏览器中访问 http://localhost:8080/orders?userId=40&orderId=60
+## 在浏览器中访问 http://localhost:8081/orders?userId=40&orderId=60
 结果应该是：
 ```
-item id: 101
-item name: Soap
-item value: 4.990000
-item id: 104
-item name: Chair
-item value: 43.000000
+item: 101 | Soap | 4.99
+item: 104 | Chair | 43.0
 ```
 
 ## 可以用下面的 SQL 在 /var/tmp/production.sqlite 中创建一个最小的数据集：

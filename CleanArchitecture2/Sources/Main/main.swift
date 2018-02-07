@@ -30,7 +30,6 @@ func main() {
     router.get("/orders") {
 	req, res, next in
 	
-	print(req)
 	webserviceHandler.showItems(request: req, response: res)
 	next()
     }

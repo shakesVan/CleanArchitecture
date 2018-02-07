@@ -19,16 +19,14 @@ extension WebServiceHandler {
     public func showItems(request: RouterRequest, response: RouterResponse) {
 	let userId = request.queryParameters["userId"] ?? ""
 	let orderId = request.queryParameters["orderId"] ?? ""
-	print(userId)
-	print(orderId)
+	print(request.queryParameters)
 	let (items, error) = orderInteractor.items(userId: userId, orderId: orderId)
 	if let error = error {
 	    print(error)
 	    return
 	}
 	for item in items {
-	    response.send("item: \(item.id) | \(item.name) | \(item.value)\n")
+	    response.send("item | id: \(item.id) | name: \(item.name) | value: \(item.value)\n")
 	}
-	print(items)
     } 
 }

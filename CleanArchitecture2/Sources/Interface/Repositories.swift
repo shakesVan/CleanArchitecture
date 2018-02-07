@@ -151,7 +151,6 @@ extension DbOrderRepo: OrderRepo {
 	}
 	let sta = "SELECT item_id FROM items2orders WHERE order_id = \(id);"
 	let result = dbHandler.prepare(sta)
-	print(result)
 	guard let itemRows = result as? [[String]] else {
 	    return (errorOrder, "获取itemIds失败")
 	}
