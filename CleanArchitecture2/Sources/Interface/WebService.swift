@@ -24,10 +24,9 @@ extension WebServiceHandler {
     public func showItems(request: RouterRequest, response: RouterResponse) {
 	let userId = request.queryParameters["userId"] ?? ""
 	let orderId = request.queryParameters["orderId"] ?? ""
-	print(request.queryParameters)
 	let (items, error) = orderInteractor.items(userId: userId, orderId: orderId)
 	if let error = error {
-	    print(error)
+	    response.send("error: \(error)") 
 	    return
 	}
 	for item in items {
@@ -39,7 +38,6 @@ extension WebServiceHandler {
 	let userId = request.queryParameters["userId"] ?? ""
 	let orderId = request.queryParameters["orderId"] ?? ""
 	let itemId = request.queryParameters["itemId"] ?? ""
-	print("add item \(request.queryParameters)")
 	
 	if let error = orderInteractor.add(userId: userId, orderId: orderId, itemId: itemId) {
 	  response.send("error: \(error)") 
@@ -61,7 +59,6 @@ extension AdminWebServiceHandler {
 	let userId = request.queryParameters["userId"] ?? ""
 	let orderId = request.queryParameters["orderId"] ?? ""
 	let itemId = request.queryParameters["itemId"] ?? ""
-	print("admin add item \(request.queryParameters)")
 	
 	if let error = adminOrderInteractor.add(userId: userId, orderId: orderId, itemId: itemId) {
 	  response.send("error: \(error)") 
