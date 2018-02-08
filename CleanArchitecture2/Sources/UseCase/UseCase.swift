@@ -121,7 +121,9 @@ extension AdminOrderInteractor {
 	if let error3 = error3 {
 	    return "找不到id 为 \(itemId) 的 itemi, error msg is \(error3) "
 	}
-
-	return order.add(item: item) 
+	if let error = order.add(item: item) {
+	    return error
+	}
+	return orderRepo.store(order)
     }
 }

@@ -6,7 +6,12 @@ public protocol OrderInteractor {
     func items(userId: String, orderId: String) -> ([Item], Error?)
 }
 
+public protocol AdminOrderInteractor {
+    func add(userId: String, orderId: String, itemId: String) -> Error?
+}
+
 extension UseCase.OrderInteractor: OrderInteractor {}
+extension UseCase.AdminOrderInteractor: AdminOrderInteractor {}
 
 public struct WebServiceHandler {
     public let orderInteractor: OrderInteractor 
@@ -34,9 +39,31 @@ extension WebServiceHandler {
 	let userId = request.queryParameters["userId"] ?? ""
 	let orderId = request.queryParameters["orderId"] ?? ""
 	let itemId = request.queryParameters["itemId"] ?? ""
-	print(request.queryParameters)
+	print("add item \(request.queryParameters)")
 	
 	if let error = orderInteractor.add(userId: userId, orderId: orderId, itemId: itemId) {
+	  response.send("error: \(error)") 
+	  return
+	}
+	response.send("add success")
+    }
+}
+
+public struct AdminWebServiceHandler {
+    public let adminOrderInteractor: AdminOrderInteractor 
+    public init(adminOrderInteractor: AdminOrderInteractor) {
+	self.adminOrderInteractor = adminOrderInteractor
+    }
+}
+
+extension AdminWebServiceHandler {
+    public func addItem(request: RouterRequest, response: RouterResponse) {
+	let userId = request.queryParameters["userId"] ?? ""
+	let orderId = request.queryParameters["orderId"] ?? ""
+	let itemId = request.queryParameters["itemId"] ?? ""
+	print("admin add item \(request.queryParameters)")
+	
+	if let error = adminOrderInteractor.add(userId: userId, orderId: orderId, itemId: itemId) {
 	  response.send("error: \(error)") 
 	  return
 	}

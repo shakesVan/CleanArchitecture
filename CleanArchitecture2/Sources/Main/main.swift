@@ -29,7 +29,6 @@ func main() {
     let router = Router()
     router.get("/orders") {
 	req, res, next in
-	
 	webserviceHandler.showItems(request: req, response: res)
 	next()
     }
@@ -38,6 +37,16 @@ func main() {
 	req, res, next in
 	webserviceHandler.addItem(request: req, response: res)
 	next()
+    }
+
+
+    let adminOrderInteractor = AdminOrderInteractor(itemRepo: itemRepo, userRepo: userRepo, orderRepo: orderRepo, logger: logger)
+    let adminWebserviceHandler = AdminWebServiceHandler(adminOrderInteractor: adminOrderInteractor)
+    router.get("/admin/addItem") {
+	req, res, next in
+	adminWebserviceHandler.addItem(request: req, response: res)
+	next()
+	
     }
 
     Kitura.addHTTPServer(onPort: 8081, with: router)
