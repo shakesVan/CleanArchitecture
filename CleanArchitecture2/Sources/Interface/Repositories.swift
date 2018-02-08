@@ -126,12 +126,17 @@ public class DbOrderRepo: DbRepo{
 
 extension DbOrderRepo: OrderRepo {
     public func store(_ order: Order) -> Error? {
-	let statement = "INSERT INTO orders (id, customerId) VALUES (\(order.id), \(order.customerId));"
+	let delSta = "DELETE FROM orders WHERE id = \(order.id)"
+	_ = dbHandler.execute(delSta)
+	let delItemSta = "DELETE FROM items2orders WHERE order_id = \(order.id)"
+	_ = dbHandler.execute(delItemSta)
+
+	let statement = "INSERT INTO orders (id, customer_id) VALUES (\(order.id), \(order.customerId));"
 	if let error = dbHandler.execute(statement) {
 	    return error
 	}
 	for item in order.items {
-	    let sta = "INSERT INTO items2orders (itemId, orderId) VALUES (\(item.id), \(order.id));"
+	    let sta = "INSERT INTO items2orders (item_id, order_id) VALUES (\(item.id), \(order.id));"
 	    if let error = dbHandler.execute(sta) {
 		return error
 	    }

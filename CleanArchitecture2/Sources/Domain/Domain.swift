@@ -57,7 +57,7 @@ extension Order {
 	    return "商品不可购买"
 	}
 
-	guard value() > 250 else {
+	guard value() <= 250 else {
 	    return "订单金额不能超过250美元"
 	}
 	self.items.append(item)

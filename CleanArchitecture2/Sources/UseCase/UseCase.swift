@@ -63,8 +63,12 @@ extension OrderInteractor {
 	guard user.customer.id == order.customerId else {
 	    return "订单不属于该用户"
 	}
-
-	return order.add(item: item) 
+	
+	if let error = order.add(item: item) {
+	    return error
+	}
+	return orderRepo.store(order)
+	
     }
 
    public func items(userId: String, orderId: String) -> ([Item], Error?) {

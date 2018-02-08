@@ -28,5 +28,18 @@ extension WebServiceHandler {
 	for item in items {
 	    response.send("item | id: \(item.id) | name: \(item.name) | value: \(item.value)\n")
 	}
-    } 
+    }
+
+    public func addItem(request: RouterRequest, response: RouterResponse) {
+	let userId = request.queryParameters["userId"] ?? ""
+	let orderId = request.queryParameters["orderId"] ?? ""
+	let itemId = request.queryParameters["itemId"] ?? ""
+	print(request.queryParameters)
+	
+	if let error = orderInteractor.add(userId: userId, orderId: orderId, itemId: itemId) {
+	  response.send("error: \(error)") 
+	  return
+	}
+	response.send("add success")
+    }
 }

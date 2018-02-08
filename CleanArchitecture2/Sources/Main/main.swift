@@ -33,6 +33,13 @@ func main() {
 	webserviceHandler.showItems(request: req, response: res)
 	next()
     }
+
+    router.get("/addItem") {
+	req, res, next in
+	webserviceHandler.addItem(request: req, response: res)
+	next()
+    }
+
     Kitura.addHTTPServer(onPort: 8081, with: router)
     Kitura.run()
 }
