@@ -1,5 +1,14 @@
 import Domain
 
+public protocol OrderUseCase  {
+    func add(userId: String, orderId: String, itemId: String) -> Error?
+    func items(userId: String, orderId: String) -> ([Item], Error?)
+}
+
+public protocol AdminOrderUseCase {
+    func add(userId: String, orderId: String, itemId: String) -> Error?
+}
+
 public protocol UserRepo {
     func store(_ user: User) -> Error?
     func find(id: String) -> (User, Error?)
@@ -46,7 +55,7 @@ public struct OrderInteractor {
     }
 }
 
-extension OrderInteractor {
+extension OrderInteractor: OrderUseCase {
     public func add(userId: String, orderId: String, itemId: String) -> Error? {
 	let (user, error) = userRepo.find(id: userId)
 	if let error = error {
@@ -127,7 +136,8 @@ public struct AdminOrderInteractor {
     }
 }
 
-extension AdminOrderInteractor {
+
+extension AdminOrderInteractor: AdminOrderUseCase {
     public func add(userId: String, orderId: String, itemId: String) -> Error? {
 	let (user, error) = userRepo.find(id: userId)
 	if let error = error {

@@ -1,21 +1,9 @@
 import UseCase
 import Kitura
 
-public protocol OrderInteractor {
-    func add(userId: String, orderId: String, itemId: String) -> Error?
-    func items(userId: String, orderId: String) -> ([Item], Error?)
-}
-
-public protocol AdminOrderInteractor {
-    func add(userId: String, orderId: String, itemId: String) -> Error?
-}
-
-extension UseCase.OrderInteractor: OrderInteractor {}
-extension UseCase.AdminOrderInteractor: AdminOrderInteractor {}
-
 public struct WebServiceHandler {
-    public let orderInteractor: OrderInteractor 
-    public init(orderInteractor: OrderInteractor) {
+    public let orderInteractor: OrderUseCase 
+    public init(orderInteractor: OrderUseCase) {
 	self.orderInteractor = orderInteractor
     }
 }
@@ -48,8 +36,8 @@ extension WebServiceHandler {
 }
 
 public struct AdminWebServiceHandler {
-    public let adminOrderInteractor: AdminOrderInteractor 
-    public init(adminOrderInteractor: AdminOrderInteractor) {
+    public let adminOrderInteractor: AdminOrderUseCase 
+    public init(adminOrderInteractor: AdminOrderUseCase) {
 	self.adminOrderInteractor = adminOrderInteractor
     }
 }
